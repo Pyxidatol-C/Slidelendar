@@ -15,6 +15,10 @@ body {
     margin: 0 auto;
 }
 
+.slidelendar-month-active {
+    color: lightgray;
+}
+
 .slidelendar-calendar {
     font-family: monospace;
     margin-bottom: 25px;

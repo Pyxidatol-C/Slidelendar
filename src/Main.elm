@@ -129,9 +129,15 @@ viewInput model =
         ]
 
 
-viewYearRow : Time.Zone -> Int -> Html Msg
-viewYearRow tz y =
+viewYearRow : Model -> Html Msg
+viewYearRow model =
     let
+        tz =
+            model.tz
+
+        y =
+            model.yy
+
         monthFirstDays =
             List.map
                 (\m -> ( m, firstDayOfMonth tz y m ))
@@ -168,7 +174,12 @@ viewYearRow tz y =
                                     mStr =
                                         monthToInt m |> String.fromInt
                                 in
-                                div [ onClick <| ChangeMM mStr ]
+                                div
+                                    [ onClick <| ChangeMM mStr
+                                    , classList
+                                        [ ( "slidelendar-month-active", m == model.mm )
+                                        ]
+                                    ]
                                     [ text mStr ]
                             )
                             ms
@@ -198,15 +209,7 @@ viewCalendar model =
                     -9
 
                 Just wd ->
-                    case weekdayToInt wd - 1 of
-                        0 ->
-                            6
-
-                        6 ->
-                            0
-
-                        n ->
-                            n
+                    7 - weekdayToInt wd
 
         cellContents =
             [ [ "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  " ]
@@ -263,7 +266,7 @@ viewCalendar model =
                 List.indexedMap (makeCell i) contents
 
         yearRow =
-            viewYearRow model.tz model.yy
+            viewYearRow model
     in
     div
         [ class "slidelendar-calendar" ]
