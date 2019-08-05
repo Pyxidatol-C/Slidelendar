@@ -1,0 +1,36 @@
+body {
+    background: black;
+    color: white;
+}
+
+.slidelendar {
+    /* border: 1px blue solid; */
+    width: 800px;
+    margin: auto;
+    margin-top: 250px;
+}
+
+.slidelendar-inputs {
+    display: table;
+    margin: 0 auto;
+}
+
+.slidelendar-calendar {
+    font-family: monospace;
+    margin-bottom: 25px;
+}
+
+.slidelendar-row {
+    display: flex;
+    justify-content: center;
+}
+
+.slidelendar-cell {
+    width: 25px;
+    height: 25px;
+}
+
+.slidelendar-frame {
+    background-color: red;
+    font-weight: 500;
+}

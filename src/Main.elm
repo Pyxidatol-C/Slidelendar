@@ -96,9 +96,16 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div []
+    div [ class "slidelendar" ]
         [ viewCalendar model
-        , input
+        , viewInput model
+        ]
+
+
+viewInput : Model -> Html Msg
+viewInput model =
+    div [ class "slidelendar-inputs" ]
+        [ input
             [ value <| String.fromInt model.yy
             , type_ "number"
             , onInput ChangeYY
@@ -140,20 +147,35 @@ viewCalendar model =
         isFrame : Int -> Int -> Bool
         isFrame i j =
             if i == 0 || i == 7 then
-                frameLeftEnd <= j && j <= frameLeftEnd + 7
+                frameLeftEnd <= j && j <= frameLeftEnd + 8
 
             else
-                frameLeftEnd == j || j == frameLeftEnd + 7
+                frameLeftEnd == j || j == frameLeftEnd + 8
 
         makeCell : Int -> Int -> String -> Html msg
         makeCell i j content =
+            let
+                cellIsFrame =
+                    isFrame i j
+
+                content_ =
+                    if cellIsFrame then
+                        if i == 0 && frameLeftEnd < j && j < frameLeftEnd + 8 then
+                            j - frameLeftEnd |> intToWeekdayStr
+
+                        else
+                            "  "
+
+                    else
+                        content
+            in
             div
                 [ classList
                     [ ( "slidelendar-frame", isFrame i j )
                     , ( "slidelendar-cell", True )
                     ]
                 ]
-                [ text content ]
+                [ text content_ ]
 
         makeRow : Int -> List String -> Html msg
         makeRow i contents =
@@ -163,7 +185,7 @@ viewCalendar model =
                 List.indexedMap (makeCell i) contents
     in
     div
-        []
+        [ class "slidelendar-calendar" ]
         (List.indexedMap makeRow cellContents)
 
 
@@ -290,3 +312,31 @@ weekdayToInt wd =
 
         Time.Sun ->
             7
+
+
+intToWeekdayStr : Int -> String
+intToWeekdayStr i =
+    case i of
+        1 ->
+            "一"
+
+        2 ->
+            "二"
+
+        3 ->
+            "三"
+
+        4 ->
+            "四"
+
+        5 ->
+            "五"
+
+        6 ->
+            "六"
+
+        7 ->
+            "日"
+
+        _ ->
+            "  "
