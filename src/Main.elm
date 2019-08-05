@@ -4,6 +4,7 @@ import Browser
 import Html exposing (Html, div, input)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Task
 import Time
 
 
@@ -12,7 +13,12 @@ import Time
 
 
 main =
-    Browser.sandbox { init = init, update = update, view = view }
+    Browser.element
+        { init = init
+        , update = update
+        , view = view
+        , subscriptions = subscriptions
+        }
 
 
 
@@ -22,12 +28,16 @@ main =
 type alias Model =
     { yy : Int
     , mm : Time.Month
+    , tz : Time.Zone
     }
 
 
-init : Model
-init =
-    { yy = 2019, mm = Time.May }
+init : () -> ( Model, Cmd Msg )
+init _ =
+    ( Model 2019 Time.May Time.utc
+    , Task.map2 (\a b -> ( a, b )) Time.now Time.here
+        |> Task.perform SetTime
+    )
 
 
 
@@ -37,26 +47,46 @@ init =
 type Msg
     = ChangeYY String
     | ChangeMM String
+    | SetTime ( Time.Posix, Time.Zone )
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         ChangeYY strY ->
             case String.toInt strY of
                 Nothing ->
-                    model
+                    ( model, Cmd.none )
 
                 Just y ->
-                    { model | yy = y }
+                    ( { model | yy = y }, Cmd.none )
 
         ChangeMM strM ->
             case String.toInt strM |> Maybe.andThen intToMonth of
                 Nothing ->
-                    model
+                    ( model, Cmd.none )
 
                 Just m ->
-                    { model | mm = m }
+                    ( { model | mm = m }, Cmd.none )
+
+        SetTime ( time, tz ) ->
+            let
+                m =
+                    Time.toMonth tz time
+
+                y =
+                    Time.toYear tz time
+            in
+            ( Model y m tz, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
 
