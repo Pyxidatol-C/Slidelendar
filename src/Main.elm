@@ -63,12 +63,21 @@ update msg model =
                     ( { model | yy = y }, Cmd.none )
 
         ChangeMM strM ->
-            case String.toInt strM |> Maybe.andThen intToMonth of
+            case String.toInt strM of
                 Nothing ->
                     ( model, Cmd.none )
 
-                Just m ->
-                    ( { model | mm = m }, Cmd.none )
+                Just mInt ->
+                    if mInt == 0 then
+                        ( { model | mm = Time.Dec, yy = model.yy - 1 }, Cmd.none )
+
+                    else if mInt == 13 then
+                        ( { model | mm = Time.Jan, yy = model.yy + 1 }, Cmd.none )
+
+                    else
+                        intToMonth mInt
+                            |> Maybe.andThen (\m -> Just ( { model | mm = m }, Cmd.none ))
+                            |> Maybe.withDefault ( model, Cmd.none )
 
         SetTime ( time, tz ) ->
             let

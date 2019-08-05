@@ -5245,6 +5245,15 @@ var elm$core$Maybe$andThen = F2(
 			return elm$core$Maybe$Nothing;
 		}
 	});
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
 var elm$core$Platform$Cmd$batch = _Platform_batch;
 var elm$core$Platform$Cmd$none = elm$core$Platform$Cmd$batch(_List_Nil);
 var elm$core$String$toInt = _String_toInt;
@@ -5365,19 +5374,33 @@ var author$project$Main$update = F2(
 				}
 			case 'ChangeMM':
 				var strM = msg.a;
-				var _n2 = A2(
-					elm$core$Maybe$andThen,
-					author$project$Main$intToMonth,
-					elm$core$String$toInt(strM));
+				var _n2 = elm$core$String$toInt(strM);
 				if (_n2.$ === 'Nothing') {
 					return _Utils_Tuple2(model, elm$core$Platform$Cmd$none);
 				} else {
-					var m = _n2.a;
-					return _Utils_Tuple2(
+					var mInt = _n2.a;
+					return (!mInt) ? _Utils_Tuple2(
 						_Utils_update(
 							model,
-							{mm: m}),
-						elm$core$Platform$Cmd$none);
+							{mm: elm$time$Time$Dec, yy: model.yy - 1}),
+						elm$core$Platform$Cmd$none) : ((mInt === 13) ? _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{mm: elm$time$Time$Jan, yy: model.yy + 1}),
+						elm$core$Platform$Cmd$none) : A2(
+						elm$core$Maybe$withDefault,
+						_Utils_Tuple2(model, elm$core$Platform$Cmd$none),
+						A2(
+							elm$core$Maybe$andThen,
+							function (m) {
+								return elm$core$Maybe$Just(
+									_Utils_Tuple2(
+										_Utils_update(
+											model,
+											{mm: m}),
+										elm$core$Platform$Cmd$none));
+							},
+							author$project$Main$intToMonth(mInt))));
 				}
 			default:
 				var _n3 = msg.a;
