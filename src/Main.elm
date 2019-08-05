@@ -3,7 +3,7 @@ module Main exposing (main)
 import Browser
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import Iso8601
 import Task
 import Time
@@ -129,7 +129,7 @@ viewInput model =
         ]
 
 
-viewYearRow : Time.Zone -> Int -> Html msg
+viewYearRow : Time.Zone -> Int -> Html Msg
 viewYearRow tz y =
     let
         monthFirstDays =
@@ -163,7 +163,14 @@ viewYearRow tz y =
                         [ class "slidelendar-cell" ]
                     <|
                         List.map
-                            (\m -> div [] [ monthToInt m |> String.fromInt |> text ])
+                            (\m ->
+                                let
+                                    mStr =
+                                        monthToInt m |> String.fromInt
+                                in
+                                div [ onClick <| ChangeMM mStr ]
+                                    [ text mStr ]
+                            )
                             ms
                 )
                 monthsStartingOn
@@ -180,7 +187,7 @@ viewYearRow tz y =
             ++ [ makeCell [ y |> String.fromInt |> text ] ]
 
 
-viewCalendar : Model -> Html msg
+viewCalendar : Model -> Html Msg
 viewCalendar model =
     let
         frameLeftEnd =
@@ -247,15 +254,12 @@ viewCalendar model =
             <|
                 List.indexedMap (makeCell i) contents
 
-        topYearRow =
+        yearRow =
             viewYearRow model.tz model.yy
-
-        botYearRow =
-            viewYearRow model.tz (model.yy + 1)
     in
     div
         [ class "slidelendar-calendar" ]
-        (topYearRow :: List.indexedMap makeRow cellContents ++ [ botYearRow ])
+        (List.indexedMap makeRow cellContents ++ [ yearRow ])
 
 
 firstDayOfMonth : Time.Zone -> Int -> Time.Month -> Maybe Time.Weekday
