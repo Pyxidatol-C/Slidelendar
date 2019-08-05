@@ -21,13 +21,13 @@ main =
 
 type alias Model =
     { yy : Int
-    , mm : Int
+    , mm : Time.Month
     }
 
 
 init : Model
 init =
-    { yy = 2019, mm = 8 }
+    { yy = 2019, mm = Time.May }
 
 
 
@@ -43,11 +43,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         ChangeYY strY ->
-            let
-                mY =
-                    String.toInt strY
-            in
-            case mY of
+            case String.toInt strY of
                 Nothing ->
                     model
 
@@ -55,20 +51,12 @@ update msg model =
                     { model | yy = y }
 
         ChangeMM strM ->
-            let
-                mM =
-                    String.toInt strM
-            in
-            case mM of
+            case String.toInt strM |> Maybe.andThen intToMonth of
                 Nothing ->
                     model
 
                 Just m ->
-                    if 1 <= m && m <= 12 then
-                        { model | mm = m }
-
-                    else
-                        model
+                    { model | mm = m }
 
 
 
@@ -85,9 +73,92 @@ view model =
             ]
             []
         , input
-            [ value <| String.fromInt model.mm
+            [ value <| String.fromInt <| monthToInt model.mm
             , type_ "number"
             , onInput ChangeMM
             ]
             []
         ]
+
+
+monthToInt : Time.Month -> Int
+monthToInt m =
+    case m of
+        Time.Jan ->
+            1
+
+        Time.Feb ->
+            2
+
+        Time.Mar ->
+            3
+
+        Time.Apr ->
+            4
+
+        Time.May ->
+            5
+
+        Time.Jun ->
+            6
+
+        Time.Jul ->
+            7
+
+        Time.Aug ->
+            8
+
+        Time.Sep ->
+            9
+
+        Time.Oct ->
+            10
+
+        Time.Nov ->
+            11
+
+        Time.Dec ->
+            12
+
+
+intToMonth : Int -> Maybe Time.Month
+intToMonth i =
+    case i of
+        1 ->
+            Just Time.Jan
+
+        2 ->
+            Just Time.Feb
+
+        3 ->
+            Just Time.Mar
+
+        4 ->
+            Just Time.Apr
+
+        5 ->
+            Just Time.May
+
+        6 ->
+            Just Time.Jun
+
+        7 ->
+            Just Time.Jul
+
+        8 ->
+            Just Time.Aug
+
+        9 ->
+            Just Time.Sep
+
+        10 ->
+            Just Time.Oct
+
+        11 ->
+            Just Time.Nov
+
+        12 ->
+            Just Time.Dec
+
+        _ ->
+            Nothing
