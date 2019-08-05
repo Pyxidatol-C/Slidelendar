@@ -154,7 +154,7 @@ viewYearRow tz y =
                         )
                         monthFirstDays
                 )
-                [ Time.Mon, Time.Tue, Time.Wed, Time.Thu, Time.Fri, Time.Sat, Time.Sun ]
+                [ Time.Sun, Time.Tue, Time.Wed, Time.Thu, Time.Fri, Time.Sat, Time.Mon ]
 
         monthsCells =
             List.map
@@ -198,7 +198,15 @@ viewCalendar model =
                     -9
 
                 Just wd ->
-                    weekdayToInt wd - 1
+                    case weekdayToInt wd - 1 of
+                        0 ->
+                            6
+
+                        6 ->
+                            0
+
+                        n ->
+                            n
 
         cellContents =
             [ [ "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  " ]
