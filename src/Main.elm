@@ -129,6 +129,57 @@ viewInput model =
         ]
 
 
+viewYearRow : Time.Zone -> Int -> Html msg
+viewYearRow tz y =
+    let
+        monthFirstDays =
+            List.map
+                (\m -> ( m, firstDayOfMonth tz y m ))
+                [ Time.Jan, Time.Feb, Time.Mar, Time.Apr, Time.May, Time.Jun, Time.Jul, Time.Aug, Time.Sep, Time.Oct, Time.Nov, Time.Dec ]
+
+        monthsStartingOn =
+            List.map
+                (\wd ->
+                    List.filterMap
+                        (\( m, mWd ) ->
+                            mWd
+                                |> Maybe.andThen
+                                    (\wd_ ->
+                                        if wd == wd_ then
+                                            Just m
+
+                                        else
+                                            Nothing
+                                    )
+                        )
+                        monthFirstDays
+                )
+                [ Time.Mon, Time.Tue, Time.Wed, Time.Thu, Time.Fri, Time.Sat, Time.Sun ]
+
+        monthsCells =
+            List.map
+                (\ms ->
+                    div
+                        [ class "slidelendar-cell" ]
+                    <|
+                        List.map
+                            (\m -> div [] [ monthToInt m |> String.fromInt |> text ])
+                            ms
+                )
+                monthsStartingOn
+
+        makeCell children =
+            div [ class "slidelendar-cell" ] children
+
+        emptyCell =
+            makeCell [ text "  " ]
+    in
+    div [ class "slidelendar-row" ] <|
+        monthsCells
+            ++ List.repeat 7 emptyCell
+            ++ [ makeCell [ y |> String.fromInt |> text ] ]
+
+
 viewCalendar : Model -> Html msg
 viewCalendar model =
     let
@@ -172,6 +223,9 @@ viewCalendar model =
                         if i == 0 && frameLeftEnd < j && j < frameLeftEnd + 8 then
                             j - frameLeftEnd |> intToWeekdayStr
 
+                        else if (i == 0 || i == 7) && j == frameLeftEnd then
+                            ". "
+
                         else
                             "  "
 
@@ -192,10 +246,16 @@ viewCalendar model =
                 [ class "slidelendar-row" ]
             <|
                 List.indexedMap (makeCell i) contents
+
+        topYearRow =
+            viewYearRow model.tz model.yy
+
+        botYearRow =
+            viewYearRow model.tz (model.yy + 1)
     in
     div
         [ class "slidelendar-calendar" ]
-        (List.indexedMap makeRow cellContents)
+        (topYearRow :: List.indexedMap makeRow cellContents ++ [ botYearRow ])
 
 
 firstDayOfMonth : Time.Zone -> Int -> Time.Month -> Maybe Time.Weekday
