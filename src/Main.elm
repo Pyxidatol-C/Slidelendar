@@ -1,9 +1,10 @@
 module Main exposing (main)
 
 import Browser
-import Html exposing (Html, div, input)
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Iso8601
 import Task
 import Time
 
@@ -96,7 +97,8 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     div []
-        [ input
+        [ viewCalendar model
+        , input
             [ value <| String.fromInt model.yy
             , type_ "number"
             , onInput ChangeYY
@@ -109,6 +111,77 @@ view model =
             ]
             []
         ]
+
+
+viewCalendar : Model -> Html msg
+viewCalendar model =
+    let
+        frameLeftEnd =
+            case firstDayOfMonth model.tz model.yy model.mm of
+                -- This should never happen.
+                -- If it somehow did, the red frame will not appear
+                Nothing ->
+                    -9
+
+                Just wd ->
+                    weekdayToInt wd - 1
+
+        cellContents =
+            [ [ "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  " ]
+            , [ "  ", "  ", "  ", "  ", "  ", "  ", "  ", " 1", " 2", " 3", " 4", " 5", " 6", " 7", "  " ]
+            , [ "  ", " 2", " 3", " 4", " 5", " 6", " 7", " 8", " 9", "10", "11", "12", "13", "14", "  " ]
+            , [ "  ", " 9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "  " ]
+            , [ "  ", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "  " ]
+            , [ "  ", "23", "24", "25", "26", "27", "28", "29", "30", "31", "  ", "  ", "  ", "  ", "  " ]
+            , [ "  ", "30", "31", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  " ]
+            , [ "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  ", "  " ]
+            ]
+
+        isFrame : Int -> Int -> Bool
+        isFrame i j =
+            if i == 0 || i == 7 then
+                frameLeftEnd <= j && j <= frameLeftEnd + 7
+
+            else
+                frameLeftEnd == j || j == frameLeftEnd + 7
+
+        makeCell : Int -> Int -> String -> Html msg
+        makeCell i j content =
+            div
+                [ classList
+                    [ ( "slidelendar-frame", isFrame i j )
+                    , ( "slidelendar-cell", True )
+                    ]
+                ]
+                [ text content ]
+
+        makeRow : Int -> List String -> Html msg
+        makeRow i contents =
+            div
+                [ class "slidelendar-row" ]
+            <|
+                List.indexedMap (makeCell i) contents
+    in
+    div
+        []
+        (List.indexedMap makeRow cellContents)
+
+
+firstDayOfMonth : Time.Zone -> Int -> Time.Month -> Maybe Time.Weekday
+firstDayOfMonth tz y m =
+    let
+        yyyy =
+            String.fromInt y |> String.padLeft 4 '0'
+
+        mm =
+            monthToInt m |> String.fromInt |> String.padLeft 2 '0'
+    in
+    case Iso8601.toTime <| yyyy ++ "-" ++ mm ++ "-" ++ "01" of
+        Ok time ->
+            Just <| Time.toWeekday tz time
+
+        _ ->
+            Nothing
 
 
 monthToInt : Time.Month -> Int
@@ -192,3 +265,28 @@ intToMonth i =
 
         _ ->
             Nothing
+
+
+weekdayToInt : Time.Weekday -> Int
+weekdayToInt wd =
+    case wd of
+        Time.Mon ->
+            1
+
+        Time.Tue ->
+            2
+
+        Time.Wed ->
+            3
+
+        Time.Thu ->
+            4
+
+        Time.Fri ->
+            5
+
+        Time.Sat ->
+            6
+
+        Time.Sun ->
+            7
