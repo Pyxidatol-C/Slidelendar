@@ -160,7 +160,7 @@ viewYearRow model =
                         )
                         monthFirstDays
                 )
-                [ Time.Sun, Time.Tue, Time.Wed, Time.Thu, Time.Fri, Time.Sat, Time.Mon ]
+                [ Time.Sun, Time.Sat, Time.Fri, Time.Thu, Time.Wed, Time.Tue, Time.Mon ]
 
         monthsCells =
             List.map
