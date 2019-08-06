@@ -1,6 +1,6 @@
 body {
-    background: black;
-    color: white;
+    background: #1e1f26;
+    color: #fff4e6;
 }
 
 .slidelendar {
@@ -36,6 +36,6 @@ body {
 }
 
 .slidelendar-frame {
-    background-color: red;
+    background-color: #cc2136;
     font-weight: 500;
 }
